@@ -12,12 +12,21 @@
 	"activationEvents": [
 		"onCommand:weblate.create"
 	],
+	"publisher": "ianfa",
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
 				"command": "weblate.create",
 				"title": "Weblate: Create"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "weblate.create",
+				"key": "ctrl+shift+t",
+				"mac": "cmd+shift+t",
+				"when": "editorTextFocus"
 			}
 		],
 		"configuration": {
