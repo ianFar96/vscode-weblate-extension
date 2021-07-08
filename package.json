@@ -2,7 +2,7 @@
 	"name": "weblate",
 	"displayName": "Weblate",
 	"description": "Manage all your translations messages in Weblate",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"engines": {
 		"vscode": "^1.57.0"
 	},
@@ -16,8 +16,7 @@
 	"publisher": "ianfa",
 	"main": "./dist/extension.js",
 	"contributes": {
-		"commands": [
-			{
+		"commands": [{
 				"command": "weblate.create",
 				"title": "Weblate: Create"
 			},
@@ -26,8 +25,7 @@
 				"title": "Weblate: Search"
 			}
 		],
-		"keybindings": [
-			{
+		"keybindings": [{
 				"command": "weblate.create",
 				"key": "ctrl+shift+t",
 				"mac": "cmd+shift+t",

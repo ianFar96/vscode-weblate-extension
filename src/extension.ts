@@ -1,29 +1,58 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import { constantCase } from "constant-case";
 import axios, { AxiosResponse } from 'axios';
 import { flatten } from 'flat';
+import * as vscode from 'vscode';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
 	/**
-	 * Get settings vars
-	 */
-	const config = vscode.workspace.getConfiguration('weblate');
-	const apiKey = config.get('apiKey') as string;
-	const baseUrl = config.get('baseUrl') as string;
-	const project = config.get('project') as string;
-	const component = config.get('component') as string;
-	const ngxTranslate = config.get('ngxTranslate') as string;
-	const defaultLanguage = config.get('defaultLanguage') as string;
-
-	/**
 	 * JSON translations
 	 */
 	let translations: { [key: string]: string } | null;
+
+	/**
+	 * Extension ccnfiguration
+	 */
+	let apiKey: string;
+	let baseUrl: string;
+	let project: string;
+	let component: string;
+	let ngxTranslate: boolean;
+	let defaultLanguage: string;
+
+	/**
+	 * Get settings vars
+	 */
+	const setup = () => {
+		const config = vscode.workspace.getConfiguration('weblate');
+		apiKey = config.get('apiKey') as string;
+		baseUrl = config.get('baseUrl') as string;
+		project = config.get('project') as string;
+		component = config.get('component') as string;
+		ngxTranslate = config.get('ngxTranslate') as boolean;
+		defaultLanguage = config.get('defaultLanguage') as string;
+
+		/**
+		 * Remove current translations
+		 */
+		translations = null;
+	};
+
+	/**
+	 * On config change => reload settings
+	 */
+	vscode.workspace.onDidChangeConfiguration(event => {
+		let affected = event.affectsConfiguration("weblate");
+		if (affected) {
+			setup();
+		}
+	});
+
+	setup();
 
 	/**
 	 * Get user selection
