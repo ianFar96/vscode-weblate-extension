@@ -1,8 +1,8 @@
 {
 	"name": "weblate",
-	"displayName": "weblate",
+	"displayName": "Weblate",
 	"description": "Manage all your translations messages in Weblate",
-	"version": "0.0.2",
+	"version": "1.0.0",
 	"engines": {
 		"vscode": "^1.57.0"
 	},
