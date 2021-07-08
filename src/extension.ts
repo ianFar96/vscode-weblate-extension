@@ -2,7 +2,8 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { constantCase } from "constant-case";
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
+import { flatten } from 'flat';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -18,6 +19,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const component = config.get('component') as string;
 	const ngxTranslate = config.get('ngxTranslate') as string;
 	const defaultLanguage = config.get('defaultLanguage') as string;
+
+	/**
+	 * JSON translations
+	 */
+	let translations: { [key: string]: string } | null;
 
 	/**
 	 * Get user selection
@@ -58,24 +64,24 @@ export function activate(context: vscode.ExtensionContext) {
 		if (!editor) { return null; }
 
 		/**
-		 * If file is typescript
+		 * Edit file
 		 */
-		if (editor?.document && (vscode.languages.match('typescript', editor?.document) || vscode.languages.match('html', editor?.document))) {
-			editor.edit((editBuilder: vscode.TextEditorEdit) => {
+		editor.edit((editBuilder: vscode.TextEditorEdit) => {
 
-				/**
-				 * They lost focus of the file?
-				 * Can't continue!
-				 */
-				if (!editor?.selection) {
-					vscode.window.showErrorMessage('No text selection found, could not replace the text with thekey');
-					return;
-				}
+			/**
+			 * They lost focus of the file?
+			 * Can't continue!
+			 */
+			if (!editor?.selection) {
+				vscode.window.showErrorMessage('No text selection nor cursor found, could not replace the text with thekey');
+				return;
+			}
 
-				/**
-				 * Set the text we're gonna use to replace the selection
-				 */
-				let text: string = '';
+			/**
+			 * Set the text we're gonna use to replace the selection
+			 */
+			let text: string = key;
+			if (ngxTranslate) {
 				if (vscode.languages.match('typescript', editor?.document)) {
 
 					/**
@@ -103,19 +109,19 @@ export function activate(context: vscode.ExtensionContext) {
 					 */
 					text = '{{ "' + key + '"|translate }}';
 				}
+			}
 
-				/**
-				 * Replace selection or insert the text
-				 */
-				editor?.selections.forEach((selection: vscode.Selection) => {
-					if (selection.isEmpty) {
-						editBuilder.insert(selection.active, text);
-					} else {
-						editBuilder.replace(selection, text);
-					}
-				});
+			/**
+			 * Replace selection or insert the text
+			 */
+			editor?.selections.forEach((selection: vscode.Selection) => {
+				if (selection.isEmpty) {
+					editBuilder.insert(selection.active, text);
+				} else {
+					editBuilder.replace(selection, text);
+				}
 			});
-		}
+		});
 	};
 
 	/**
@@ -141,7 +147,8 @@ export function activate(context: vscode.ExtensionContext) {
 		 */
 		vscode.window.showInputBox({
 			title: 'New key for the selected text',
-			value: constantCase(selection as string)
+			// value: constantCase(selection as string)
+			value: selection as string
 		}).then((key: string | undefined) => {
 
 			/**
@@ -181,9 +188,12 @@ export function activate(context: vscode.ExtensionContext) {
 					/**
 					 * Replace selected text with key
 					 */
-					if (ngxTranslate) {
-						replaceWithKey(key);
-					}
+					replaceWithKey(key);
+
+					/**
+					 * Reset the Translations json
+					 */
+					translations = null;
 				})
 				.catch((error: any) => {
 
@@ -195,6 +205,106 @@ export function activate(context: vscode.ExtensionContext) {
 				});
 		});
 
+	}));
+
+	/**
+	 * Search command
+	 */
+	context.subscriptions.push(vscode.commands.registerCommand('weblate.search', () => {
+
+		/**
+		 * Show dropdown function (basically a continue)
+		 */
+		const showDropdown = () => {
+
+			/**
+			 * Prepare the quickpick items for the picker
+			 */
+			let items: vscode.QuickPickItem[] = [];
+			for (const key in translations) {
+				if (Object.prototype.hasOwnProperty.call(translations, key)) {
+					items.push({
+						label: translations[key] as string,
+						detail: key
+					});
+				}
+			}
+
+			/**
+			 * Show picker to choose the translation
+			 */
+			vscode.window.showQuickPick(items, {
+				title: 'Select the desired translation/key to paste the key in the document',
+				ignoreFocusOut: true,
+				matchOnDetail: true,
+			})
+				.then((item: vscode.QuickPickItem | undefined) => {
+
+					/**
+					 * Operation aborted
+					 */
+					if (!item) {
+						vscode.window.showWarningMessage('Mission aborted, no key was pasted');
+						return;
+					}
+
+					/**
+					 * Replace selected text with key
+					 */
+					replaceWithKey(item.detail as string);
+				});
+		};
+
+		/**
+		 * If translations not loaded
+		 */
+		if (!translations) {
+
+			/**
+			 * Create URL
+			 */
+			const url = baseUrl + '/api/translations/' + project + '/' + component + '/' + defaultLanguage + '/file/';
+
+			/**
+			 * Log
+			 */
+			vscode.window.showInformationMessage('Sending request to ' + url + '. for more info https://docs.weblate.org/en/latest/api.html#get--api-translations-(string-project)-(string-component)-(string-language)-file-');
+
+			/**
+			 * HTTP request, fetch translations
+			 */
+			axios.get(url, {
+				headers: {
+					"Authorization": 'Token ' + apiKey
+				}
+			})
+				.then((response: AxiosResponse<JSON>) => {
+
+					/**
+					 * Set translations
+					 */
+					translations = flatten(response.data);
+
+					/**
+					 * Continue
+					 */
+					showDropdown();
+				})
+				.catch((error: any) => {
+
+					/**
+					 * Log the error
+					 */
+					console.error(error);
+					vscode.window.showErrorMessage('Error fetching translations, for more info view the console log');
+				});
+		} else {
+
+			/**
+			 * Continue
+			 */
+			showDropdown();
+		}
 	}));
 }
 
