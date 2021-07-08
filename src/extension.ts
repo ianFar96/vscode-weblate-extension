@@ -130,13 +130,13 @@ export function activate(context: vscode.ExtensionContext) {
 					/**
 					 * Typescript string
 					 */
-					text = 'this.translate.instant("' + key + '")';
+					text = 'this.translate.instant(\'' + key + '\')';
 				} else if (vscode.languages.match('html', editor?.document)) {
 
 					/**
 					 * HTML string
 					 */
-					text = '{{ "' + key + '"|translate }}';
+					text = '{{ \'' + key + '\'|translate }}';
 				}
 			}
 
