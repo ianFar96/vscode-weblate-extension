@@ -155,9 +155,10 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	/**
-	 * Create command
+	 * Create a new translation
+	 * @param key 
 	 */
-	context.subscriptions.push(vscode.commands.registerCommand('weblate.create', () => {
+	const createNewTranslation = (key?: string) => {
 
 		/**
 		 * Get user selection
@@ -177,7 +178,7 @@ export function activate(context: vscode.ExtensionContext) {
 		 */
 		vscode.window.showInputBox({
 			title: 'New key for the selected text',
-			value: constantCase(selection as string)
+			value: constantCase(key || selection)
 		}).then((key: string | undefined) => {
 
 			/**
@@ -233,7 +234,13 @@ export function activate(context: vscode.ExtensionContext) {
 					vscode.window.showErrorMessage('Error adding the new translation, for more info view the console log');
 				});
 		});
+	};
 
+	/**
+	 * Create command
+	 */
+	context.subscriptions.push(vscode.commands.registerCommand('weblate.create', () => {
+		createNewTranslation();
 	}));
 
 	/**
@@ -260,28 +267,62 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			/**
-			 * Show picker to choose the translation
+			 * Create new translation
 			 */
-			vscode.window.showQuickPick(items, {
-				title: 'Select the desired translation/key to paste the key in the document',
-				ignoreFocusOut: true,
-				matchOnDetail: true,
-			})
-				.then((item: vscode.QuickPickItem | undefined) => {
+			items.push({
+				alwaysShow: true,
+				label: '$(plus) Create new translation'
+			});
+
+			/**
+			 * Get user selection
+			 */
+			const selection = getUserSelection();
+
+			/**
+			 * Show picker to choose the translation or create a new one
+			 */
+			const quickpick = vscode.window.createQuickPick();
+			quickpick.value = selection || '';
+			quickpick.items = items;
+			quickpick.show();
+			quickpick.onDidAccept(() => {
+
+				/**
+				 * Hide quickpick
+				 */
+				quickpick.hide();
+
+				/**
+				 * Get selected item
+				 */
+				const item = quickpick.selectedItems[0];
+
+				/**
+				 * Operation aborted
+				 */
+				if (!item) {
+					vscode.window.showWarningMessage('Mission aborted, no key was pasted');
+					return;
+				}
+
+				/**
+				 * If create a new entry
+				 */
+				if (item.label === '$(plus) Create new translation') {
 
 					/**
-					 * Operation aborted
+					 * Create new translation with quickpick value as key
 					 */
-					if (!item) {
-						vscode.window.showWarningMessage('Mission aborted, no key was pasted');
-						return;
-					}
+					createNewTranslation(quickpick.value);
+				} else {
 
 					/**
 					 * Replace selected text with key
 					 */
 					replaceWithKey(item.detail as string);
-				});
+				}
+			});
 		};
 
 		/**
