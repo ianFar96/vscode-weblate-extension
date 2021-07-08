@@ -16,7 +16,8 @@
 	"publisher": "ianfa",
 	"main": "./dist/extension.js",
 	"contributes": {
-		"commands": [{
+		"commands": [
+			{
 				"command": "weblate.create",
 				"title": "Weblate: Create"
 			},
@@ -25,7 +26,8 @@
 				"title": "Weblate: Search"
 			}
 		],
-		"keybindings": [{
+		"keybindings": [
+			{
 				"command": "weblate.create",
 				"key": "ctrl+shift+t",
 				"mac": "cmd+shift+t",
@@ -82,6 +84,7 @@
 	},
 	"scripts": {
 		"watch": "webpack --watch",
+		"build": "webpack",
 		"lint": "eslint src --ext ts",
 		"generate-vsix": "vsce package"
 	},
