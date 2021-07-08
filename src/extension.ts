@@ -2,6 +2,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import axios, { AxiosResponse } from 'axios';
+import { constantCase } from 'constant-case';
 import { flatten } from 'flat';
 import * as vscode from 'vscode';
 
@@ -176,8 +177,7 @@ export function activate(context: vscode.ExtensionContext) {
 		 */
 		vscode.window.showInputBox({
 			title: 'New key for the selected text',
-			// value: constantCase(selection as string)
-			value: selection as string
+			value: constantCase(selection as string)
 		}).then((key: string | undefined) => {
 
 			/**
