@@ -5,6 +5,7 @@ This extension will handle all comunications with weblate for your translations 
 ## Features
 
 * `Weblate:create` To create a new entry in your trasnlations with the selected text
+* `Weblate:search` To search for existing translations in your webalte server and paste the key
 
 ## Requirements
 
