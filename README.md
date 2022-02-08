@@ -1,15 +1,11 @@
-# weblate README
+# Weblate
 
 This extension will handle all comunications with weblate for your translations so you can confortably create and get your translations from server.
 
 ## Features
 
 * `Weblate:create` To create a new entry in your trasnlations with the selected text
-* `Weblate:search` To search for existing translations in your webalte server and paste the key
-
-## Requirements
-
-None
+* `Weblate:search` To search for existing translations in your weblate server and paste the key
 
 ## Extension Settings
 
@@ -26,3 +22,7 @@ None
 ### 1.0.0
 
 Initial release of Weblate
+
+## Disclaimer
+
+Big thanks to Weblate for providing this amazing tool.

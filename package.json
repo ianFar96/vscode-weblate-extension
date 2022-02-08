@@ -1,14 +1,19 @@
 {
 	"name": "weblate",
-	"displayName": "Weblate",
+	"displayName": "Weblate (unofficial)",
 	"description": "Manage all your translations messages in Weblate",
-	"version": "1.2.0",
+	"version": "1.0.0",
 	"engines": {
 		"vscode": "^1.57.0"
 	},
 	"categories": [
 		"Other"
 	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Neko80/vscode-weblate-extension.git"
+	},
+	"icon": "icon.png",
 	"activationEvents": [
 		"onCommand:weblate.create",
 		"onCommand:weblate.search"
@@ -86,7 +91,7 @@
 		"watch": "webpack --watch",
 		"build": "webpack",
 		"lint": "eslint src --ext ts",
-		"generate-vsix": "vsce package"
+		"generate-vsix": "npx vsce package"
 	},
 	"devDependencies": {
 		"@types/flat": "^5.0.2",
